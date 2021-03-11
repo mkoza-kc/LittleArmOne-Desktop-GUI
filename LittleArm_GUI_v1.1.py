@@ -1,24 +1,25 @@
-#This program has a complete set of commands for most behaviors
-#an improvement to the software would be for the arduino to wait until completion of the execution of the command before sending a ready signal
+# #This program has a complete set of commands for most behaviors
+# #an improvement to the software would be for the arduino to wait until completion of the execution of the command before sending a ready signal
 
-from Tkinter import *
-import tkMessageBox
-import time
-import serial
-import serial.tools.list_ports
+# from Tkinter import *
+# import tkMessageBox
+# import time
+# import serial
+# import serial.tools.list_ports
 
 #+++++++++++++Global Variables+++++++++++++++++++++
 
 #This program has a complete set of commands for most behaviors
 #an improvement to the software would be for the arduino to wait until completion of the execution of the command before sending a ready signal
 
-from Tkinter import *
-import tkFileDialog
-import tkMessageBox
+import tkinter 
+from tkinter import filedialog as tkFileDialog
+from tkinter import messagebox as tkMessageBox
 import time
 import serial
 import serial.tools.list_ports
 import copy
+import sys
 
 #+++++++++++++Global Variables+++++++++++++++++++++
 
@@ -35,21 +36,21 @@ checker = 0  #Loop control
 while checker == 0:
     #Find the serial port that the arduino is connected to
     ports = list(serial.tools.list_ports.comports())
-    print ports
+    print(ports)
 	
     for p in ports:
         
-        print "Searching for Port ..."
+        print ("Searching for Port ...")
         
         if "CH340"  in p[1]:
            
-            print p[1]
+            print (p[1])
             ser = serial.Serial(p[0], 9600, timeout = .5)
             checker = 1
             break
 			
         if "Arduino" in p[1]:
-            print "hello1"
+            print ("hello1")
             ser = serial.Serial(p[0], 9600, timeout = .5)
             checker = 1
             #print "Found the Arduino"
@@ -82,13 +83,15 @@ def move_it(aCommand):
     ser.flushInput()
     ser.flushOutput()
     command = str(base.get()) + ',' + str(shoulder.get()) +   ',' + str(elbow.get())+','+ str(gripper.get())+','+ str(21 - theSpeed.get()) + '\n'
-    print command
-    ser.write(command)
+    print (command)    
+    ser.write(command.encode())
 
     #wait until a repsonse if found from the arduino
-    OK = 'no'
-    while (OK != 'd'):
+    OK = 'no' #no
+    while (OK != 'd' and OK != b'd'):
         OK = ser.read(1)
+        print(OK)
+    print('Exit')
     
 def recordArmPos():
     #This function records the current positions of the GUI and places them in a TXT file in the same directory as this program
@@ -124,18 +127,19 @@ def sendCommand(anotherCommand):
     ser.flushInput()
     ser.flushOutput()
     theCommand = anotherCommand 
-    print theCommand
+    print (theCommand)
 
     if theCommand == "pause\n":
         time.sleep(1)
         return
     
-    ser.write(theCommand)
+    ser.write(theCommand.encode())
 
     #wait until a repsonse if found from the arduino
     OK = 'no'
-    while (OK != 'd'):
+    while (OK != 'd' and OK != b'd'):
         OK = ser.read(1)
+    print("Exit")
 			
 def goHome():
     #This function returns the robot to its initial positions and changed the GUI positions to match
@@ -153,7 +157,7 @@ def clearFile():
 def saveFileAs():
     #This function is called by the menubar
     #this function opens the current set of commands in the file motion_recording.txt and saves the contents to a new
-    print "Saving a File I see"
+    print ("Saving a File I see")
     global currentSequence			#aacess the gloabl value of the current sequence
 	
 	#open the current file and copy its contents
@@ -204,16 +208,16 @@ def stopLooper():
     loopStartStop = 0
 	
 #++++++++++++++++++++The GUI++++++++++++++++++++++
-root = Tk()
+root = tkinter.Tk()
 root.wm_title("LittleArm")
 root.configure(background = colors["background"])
 
 #++++++++++++++++++Menu+++++++++++++++++++++++++
-menubar = Menu(root)
+menubar = tkinter.Menu(root)
 
-filemenu = Menu(menubar, tearoff = 0)
+filemenu = tkinter.Menu(menubar, tearoff = 0)
 
-filemenu = Menu(menubar, tearoff=0)
+filemenu = tkinter.Menu(menubar, tearoff=0)
 filemenu.add_command(label="Open", command=openFile)
 filemenu.add_command(label= "New Sequence", command=newFile)
 
@@ -226,127 +230,127 @@ menubar.add_cascade(label="File", menu=filemenu)
 root.config(menu=menubar)
 
 #+++++++++++++++++++++++spacer frame++++++++++++++++++++++++++++++++++
-spacerFrameLeft = Frame(root, bg = colors["frame"])
+spacerFrameLeft = tkinter.Frame(root, bg = colors["frame"])
 spacerFrameLeft.grid(row = 0, column = 0 )
 
 
-spacerLabel6 = Label(spacerFrameLeft,  bg = colors["spacer"], padx = 10)
+spacerLabel6 = tkinter.Label(spacerFrameLeft,  bg = colors["spacer"], padx = 10)
 spacerLabel6.grid(row = 0, column = 0 )
 
 #+++++++++++++++++ARM+++++++++++++++++++++++++
 
 # The scroll bars
-armControl = Frame(root, background = colors["frame"])
+armControl = tkinter.Frame(root, background = colors["frame"])
 armControl.grid(row = 0, column = 1 )
 
 #armLabel = Label(armControl, text = "Arm Components", font = ("ARIAL", 24),relief = GROOVE, padx = 100)
 #armLabel.pack()
 
-spacerLabel = Label(armControl,  bg = colors["spacer"], padx = 100)
+spacerLabel = tkinter.Label(armControl,  bg = colors["spacer"], padx = 100)
 spacerLabel.grid(row = 1, column = 1 )
 
 #++++++++++++++++++++++++BASE+++++++++++++++++++++++++++
 
-baseLabel = Label(armControl, text = "Base", font = ("ARIAL", 16), relief = GROOVE, padx = 100, width = 9, bg = colors["arm"])
+baseLabel = tkinter.Label(armControl, text = "Base", font = ("ARIAL", 16), relief = tkinter.GROOVE, padx = 100, width = 9, bg = colors["arm"])
 baseLabel.grid(row = 2, column = 1 )
 
-base = Scale(armControl, from_= 5, to = 175, length = 306, orient = HORIZONTAL, troughcolor = colors["arm"], showvalue = 0, command = move_it)
+base = tkinter.Scale(armControl, from_= 5, to = 175, length = 306, orient = tkinter.HORIZONTAL, troughcolor = colors["arm"], showvalue = 0, command = move_it)
 base.set(108)
 base.grid(row = 3, column = 1 )
 
 #++++++++++++++++++++++++Shoulder+++++++++++++++++++++++++
 
-shoulderLabel = Label(armControl, text = "Shoulder", font = ("ARIAL", 16),relief = GROOVE, padx = 100, width = 9, bg = colors["arm"])
+shoulderLabel = tkinter.Label(armControl, text = "Shoulder", font = ("ARIAL", 16),relief = tkinter.GROOVE, padx = 100, width = 9, bg = colors["arm"])
 shoulderLabel.grid(row = 4, column = 1 )
 
-shoulder = Scale(armControl, from_= 5, to = 175, length = 306, orient = HORIZONTAL, troughcolor = colors["arm"], showvalue = 0,command = move_it)
+shoulder = tkinter.Scale(armControl, from_= 5, to = 175, length = 306, orient = tkinter.HORIZONTAL, troughcolor = colors["arm"], showvalue = 0,command = move_it)
 shoulder.set(100)
 shoulder.grid(row = 5, column = 1 )
 
 #++++++++++++++++++++++ELBOW++++++++++++++++++++++++++++
 
-elbowLabel = Label(armControl, text = "Elbow",font = ("ARIAL", 16), relief = GROOVE, padx = 100, width = 9, bg = colors["arm"])
+elbowLabel = tkinter.Label(armControl, text = "Elbow",font = ("ARIAL", 16), relief = tkinter.GROOVE, padx = 100, width = 9, bg = colors["arm"])
 elbowLabel.grid(row = 6, column = 1 )
 
-elbow = Scale(armControl, from_= 5, to = 175, length = 306, orient = HORIZONTAL,troughcolor = colors["arm"], showvalue = 0, command = move_it)
+elbow = tkinter.Scale(armControl, from_= 5, to = 175, length = 306, orient = tkinter.HORIZONTAL,troughcolor = colors["arm"], showvalue = 0, command = move_it)
 elbow.set(30)
 elbow.grid(row = 7, column = 1 )
 
 #++++++++++++++++++++++++++++Gripper+++++++++++++++++++
 
-gripperLabel = Label(armControl, text = "Gripper",font = ("ARIAL", 16), relief = GROOVE, padx = 100, width = 9, bg = colors["gripper"])
+gripperLabel = tkinter.Label(armControl, text = "Gripper",font = ("ARIAL", 16), relief = tkinter.GROOVE, padx = 100, width = 9, bg = colors["gripper"])
 gripperLabel.grid(row = 8, column = 1 )
 
-gripper = Scale(armControl, from_= 5, to = 75, length = 306, orient = HORIZONTAL, troughcolor = colors["gripper"], showvalue = 0,  command = move_it)
+gripper = tkinter.Scale(armControl, from_= 5, to = 75, length = 306, orient = tkinter.HORIZONTAL, troughcolor = colors["gripper"], showvalue = 0,  command = move_it)
 gripper.grid(row = 9, column = 1 )
 
 #++++++++++++++++++++++++++Speed++++++++++++++++++++++++
 
-spacerLabel2 = Label(armControl,  bg = colors["spacer"], padx = 100)
+spacerLabel2 = tkinter.Label(armControl,  bg = colors["spacer"], padx = 100)
 spacerLabel2.grid(row = 10, column = 1 )
 
-speedLabel = Label(armControl, bg = colors["speed"], font = ("Arial", 16), text = "Speed", relief = GROOVE, padx = 100, width = 9)
+speedLabel = tkinter.Label(armControl, bg = colors["speed"], font = ("Arial", 16), text = "Speed", relief = tkinter.GROOVE, padx = 100, width = 9)
 speedLabel.grid(row = 11, column = 1 )
 
-theSpeed = Scale(armControl, from_= 3, to = 20, length = 306, orient = HORIZONTAL, troughcolor = colors["speed"] ,command = move_it)
+theSpeed = tkinter.Scale(armControl, from_= 3, to = 20, length = 306, orient = tkinter.HORIZONTAL, troughcolor = colors["speed"] ,command = move_it)
 theSpeed.grid(row = 12, column = 1 )
 
 
-spacerLabel3 = Label(armControl,  bg = colors["spacer"], padx = 100)
+spacerLabel3 = tkinter.Label(armControl,  bg = colors["spacer"], padx = 100)
 spacerLabel3.grid(row = 13, column = 1 )
 
-pauseButton = Button(armControl, font = ("ARIAL", 16), text= "Pause for 1 Sec", width = 20, command = recordPause)
+pauseButton = tkinter.Button(armControl, font = ("ARIAL", 16), text= "Pause for 1 Sec", width = 20, command = recordPause)
 pauseButton.grid(row = 14, column = 1 )
 
-homeButton = Button(armControl, font = ("ARIAL", 16), text= "Go Home", width = 20, command = goHome)
+homeButton = tkinter.Button(armControl, font = ("ARIAL", 16), text= "Go Home", width = 20, command = goHome)
 homeButton.grid(row = 15, column = 1 )
 
-spacerLabel8 = Label(armControl,  bg = colors["spacer"], padx = 100)
+spacerLabel8 = tkinter.Label(armControl,  bg = colors["spacer"], padx = 100)
 spacerLabel8.grid(row = 16, column = 1 )
 
 #+++++++++++++++++++++++space frame++++++++++++++++++++++++++++++++++
 
-spacerFrame = Frame(root, bg = colors["frame"])
+spacerFrame = tkinter.Frame(root, bg = colors["frame"])
 spacerFrame.grid(row = 0, column = 2 )
 
-spacerLabel6 = Label(spacerFrame,  bg = colors["spacer"], padx = 20)
+spacerLabel6 = tkinter.Label(spacerFrame,  bg = colors["spacer"], padx = 20)
 spacerLabel6.grid(row = 0, column = 0 )
 
 #+++++++++++++++++++++++RECORD++++++++++++++++++++++++++++
-recordButtons = Frame(root, bg = colors["frame"])
+recordButtons = tkinter.Frame(root, bg = colors["frame"])
 recordButtons.grid(row = 0, column = 3 )
 
-spacerLabel4 = Label(recordButtons,  bg = colors["spacer"], padx = 100)
+spacerLabel4 = tkinter.Label(recordButtons,  bg = colors["spacer"], padx = 100)
 spacerLabel4.grid(row = 1, column = 2 )
 
-recordButton = Button(recordButtons, font = ("ARIAL", 16),text = "Record Position", width = 20, command = recordArmPos)
+recordButton = tkinter.Button(recordButtons, font = ("ARIAL", 16),text = "Record Position", width = 20, command = recordArmPos)
 recordButton.grid(row = 2, column = 2 )
 
-spacerLabel9 = Label(recordButtons,  bg = colors["spacer"], padx = 100)
+spacerLabel9 = tkinter.Label(recordButtons,  bg = colors["spacer"], padx = 100)
 spacerLabel9.grid(row = 3, column = 2 )
 
-playButton = Button(recordButtons, font = ("ARIAL", 16), text = "Play Sequence", width = 20, command = playback)
+playButton = tkinter.Button(recordButtons, font = ("ARIAL", 16), text = "Play Sequence", width = 20, command = playback)
 playButton.grid(row = 4, column = 2 )
 
-clearButton = Button(recordButtons, font = ("ARIAL", 16), text = "Clear Sequence", width = 20, command = clearFile)
+clearButton = tkinter.Button(recordButtons, font = ("ARIAL", 16), text = "Clear Sequence", width = 20, command = clearFile)
 clearButton.grid(row = 5, column = 2 )
 
-spacerLabel5 = Label(recordButtons,  bg = colors["spacer"], padx = 100)
+spacerLabel5 = tkinter.Label(recordButtons,  bg = colors["spacer"], padx = 100)
 spacerLabel5.grid(row = 6, column = 2 )
 
 #++++++++Looping+++++++++++++++++++
 
-loopStartButton = Button(recordButtons, font = ("ARIAL", 16), text = "Start Loop", width = 20, command = startLooper)
+loopStartButton = tkinter.Button(recordButtons, font = ("ARIAL", 16), text = "Start Loop", width = 20, command = startLooper)
 loopStartButton.grid(row = 7, column = 2 )
-loopStopButton = Button(recordButtons, font = ("ARIAL", 16), text = "Stop Loop", width = 20, command = stopLooper)
+loopStopButton = tkinter.Button(recordButtons, font = ("ARIAL", 16), text = "Stop Loop", width = 20, command = stopLooper)
 loopStopButton.grid(row = 8, column = 2 )
 
 #+++++++++++++++++++++++space frame++++++++++++++++++++++++++++++++++
 
-spacerFrameRight = Frame(root, bg = colors["frame"])
+spacerFrameRight = tkinter.Frame(root, bg = colors["frame"])
 spacerFrameRight.grid(row = 0, column = 4 )
 
-spacerLabel7 = Label(spacerFrameRight,  bg = colors["spacer"], padx = 10)
+spacerLabel7 = tkinter.Label(spacerFrameRight,  bg = colors["spacer"], padx = 10)
 spacerLabel7.grid(row = 0, column = 0 )
 
 #+++++++++++++++++++++++++++Primary Loop+++++++++++++++++

@@ -66,18 +66,18 @@ void loop()
     }
   }
   
-  int status1 = 0;
-  int status2 = 0;
+  int status1 = 1;
+  int status2 = 1;
   int status3 = 0;
-  int status4 = 0;
+  int status4 = 1;
   int done = 0 ; 
   
   while(done == 0 && ready == 1){  
     //move the servo to the desired position
-    status1 = servoParallelControl(desiredAngle.base, baseServo, desiredDelay);
-    status2 = servoParallelControl(desiredAngle.shoulder,  shoulderServo, desiredDelay);
+//    status1 = servoParallelControl(desiredAngle.base, baseServo, desiredDelay);
+//    status2 = servoParallelControl(desiredAngle.shoulder,  shoulderServo, desiredDelay);
     status3 = servoParallelControl(desiredAngle.elbow, elbowServo, desiredDelay);      
-    status4 = servoParallelControl(desiredGrip, gripperServo, desiredDelay);  
+//    status4 = servoParallelControl(desiredGrip, gripperServo, desiredDelay);  
     
     if (status1 == 1 & status2 == 1 & status3 == 1 & status4 == 1){
       done = 1;
